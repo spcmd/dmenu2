@@ -1,0 +1,53 @@
+543,559c543,545
+< 		if(!sel)
+< 			return;
+< 		if(strcmp(text, sel->text)) {
+< 			strncpy(originaltext, text, sizeof originaltext);
+< 			strncpy(text, sel->text, sizeof text);
+< 			cursor = strlen(text);
+< 		} else {
+< 			if(sel && sel->right) {
+< 				sel = sel->right;
+< 				strncpy(text, sel->text, sizeof text);
+< 				cursor = strlen(text);
+< 			}
+< 			else {
+< 				strncpy(text, originaltext, sizeof text);
+< 				cursor = strlen(text);
+< 				match();
+< 			}
+---
+>         if(sel && sel->right && (sel = sel->right) == next) {
+> 			curr = next;
+> 			calcoffsets();
+561c547
+< 		break;
+---
+>         break;
+563,582c549,553
+< 		if(!sel)
+< 			return;
+< 		if(strcmp(text, sel->text)) {
+< 			sel = matchend;
+< 			strncpy(originaltext, text, sizeof originaltext);
+< 			strncpy(text, sel->text, sizeof text);
+< 			cursor = strlen(text);
+< 		} else {
+< 			if(sel && sel->left) {
+< 				sel = sel->left;
+< 				strncpy(text, sel->text, sizeof text);
+< 				cursor = strlen(text);
+< 			}
+< 			else {
+< 				strncpy(text, originaltext, sizeof text);
+< 				cursor = strlen(text);
+< 				match();
+< 			}
+< 		} 
+< 		break;
+---
+>         if(sel && sel->left && (sel = sel->left)->right == curr) {
+> 			curr = prev;
+> 			calcoffsets();
+> 		}
+>         break;
