@@ -3,8 +3,8 @@
 # Tab key modification by: spcmd (https://github.com/spcmd)
 
 pkgname=dmenu2
-pkgver=0.2
-pkgrel=2
+pkgver=0.2.1
+pkgrel=1
 pkgdesc="Fork of dmenu with many useful patches applied and additional options like screen select, dim or opacity change"
 url="https://bitbucket.org/melek/dmenu2"
 arch=('i686' 'x86_64')
@@ -15,7 +15,7 @@ provides=(dmenu)
 conflicts=(dmenu)
 
 source=(dmenu2-$pkgver.tar.gz)
-md5sums=('ce0314b558b4e8692f6a5034af97f8ca')
+md5sums=('SKIP')
 
 build() {
 	cd "$srcdir/$pkgname-$pkgver"

@@ -1,53 +1,187 @@
-543,559c543,545
-< 		if(!sel)
-< 			return;
-< 		if(strcmp(text, sel->text)) {
-< 			strncpy(originaltext, text, sizeof originaltext);
-< 			strncpy(text, sel->text, sizeof text);
-< 			cursor = strlen(text);
-< 		} else {
-< 			if(sel && sel->right) {
-< 				sel = sel->right;
-< 				strncpy(text, sel->text, sizeof text);
-< 				cursor = strlen(text);
-< 			}
-< 			else {
-< 				strncpy(text, originaltext, sizeof text);
-< 				cursor = strlen(text);
-< 				match();
-< 			}
----
->         if(sel && sel->right && (sel = sel->right) == next) {
-> 			curr = next;
-> 			calcoffsets();
-561c547
-< 		break;
----
->         break;
-563,582c549,553
-< 		if(!sel)
-< 			return;
-< 		if(strcmp(text, sel->text)) {
-< 			sel = matchend;
-< 			strncpy(originaltext, text, sizeof originaltext);
-< 			strncpy(text, sel->text, sizeof text);
-< 			cursor = strlen(text);
-< 		} else {
-< 			if(sel && sel->left) {
-< 				sel = sel->left;
-< 				strncpy(text, sel->text, sizeof text);
-< 				cursor = strlen(text);
-< 			}
-< 			else {
-< 				strncpy(text, originaltext, sizeof text);
-< 				cursor = strlen(text);
-< 				match();
-< 			}
-< 		} 
-< 		break;
----
->         if(sel && sel->left && (sel = sel->left)->right == curr) {
-> 			curr = prev;
-> 			calcoffsets();
-> 		}
->         break;
+--- dmenu.c	2017-08-17 15:21:38.000000000 +0200
++++ dmenu.c.orig	2013-11-26 09:15:04.000000000 +0100
+@@ -57,7 +57,7 @@
+ static const char *normfgcolor = NULL;
+ static const char *selbgcolor  = NULL;
+ static const char *selfgcolor  = NULL;
+-static const char *dimcolor = NULL;
++static const char *dimcolor = NULL; 
+ static char *name = "dmenu";
+ static char *class = "Dmenu";
+ static char *dimname = "dimenu";
+@@ -152,7 +152,7 @@
+ 		else if (!strcmp(argv[i], "-o"))  /* opacity */
+ 			opacity = atof(argv[++i]);
+ 		else if (!strcmp(argv[i], "-dim"))  /* dim opacity */
+-			dimopacity = atof(argv[++i]);
++			dimopacity = atof(argv[++i]);	
+ 		else if (!strcmp(argv[i], "-dc")) /* dim color */
+ 			dimcolor = argv[++i];
+ 		else if(!strcmp(argv[i], "-p"))   /* adds prompt to left of input field */
+@@ -328,7 +328,7 @@
+ 	if((curpos = textnw(dc, maskin ? maskinput : text, length) + dc->font.height/2) < dc->w)
+ 		drawrect(dc, curpos, (dc->h - dc->font.height)/2 + 1, 1, dc->font.height -1, True, normcol->FG);
+ 
+-    if(!quiet || strlen(text) > 0) {
++    if(!quiet || strlen(text) > 0) {    
+         if(lines > 0) {
+             /* draw vertical list */
+             dc->w = mw - dc->x;
+@@ -494,25 +494,11 @@
+ 			return;
+ 		/* fallthrough */
+ 	case XK_Up:
+-        if(!sel)
+-			return;
+-		if(strcmp(text, sel->text)) {
+-			strncpy(originaltext, text, sizeof originaltext);
+-			strncpy(text, sel->text, sizeof text);
+-			cursor = strlen(text);
+-		} else {
+-			if(sel && sel->right) {
+-				sel = sel->right;
+-				strncpy(text, sel->text, sizeof text);
+-				cursor = strlen(text);
+-			}
+-			else {
+-				strncpy(text, originaltext, sizeof text);
+-				cursor = strlen(text);
+-				match();
+-			}
++		if(sel && sel->left && (sel = sel->left)->right == curr) {
++			curr = prev;
++			calcoffsets();
+ 		}
+-        break;
++		break;
+ 	case XK_Next:
+ 		if(!next)
+ 			return;
+@@ -548,7 +534,13 @@
+ 			return;
+ 		/* fallthrough */
+ 	case XK_Down:
+-        if(!sel)
++		if(sel && sel->right && (sel = sel->right) == next) {
++			curr = next;
++			calcoffsets();
++		}
++		break;
++	case XK_Tab:
++		if(!sel)
+ 			return;
+ 		if(strcmp(text, sel->text)) {
+ 			strncpy(originaltext, text, sizeof originaltext);
+@@ -566,19 +558,28 @@
+ 				match();
+ 			}
+ 		}
+-        break;
+-	case XK_Tab:
+-        if(sel && sel->right && (sel = sel->right) == next) {
+-			curr = next;
+-			calcoffsets();
+-		}
+-        break;
++		break;
+ 	case XK_ISO_Left_Tab:
+-        if(sel && sel->left && (sel = sel->left)->right == curr) {
+- 			curr = prev;
+- 			calcoffsets();
+- 		}
+-        break;
++		if(!sel)
++			return;
++		if(strcmp(text, sel->text)) {
++			sel = matchend;
++			strncpy(originaltext, text, sizeof originaltext);
++			strncpy(text, sel->text, sizeof text);
++			cursor = strlen(text);
++		} else {
++			if(sel && sel->left) {
++				sel = sel->left;
++				strncpy(text, sel->text, sizeof text);
++				cursor = strlen(text);
++			}
++			else {
++				strncpy(text, originaltext, sizeof text);
++				cursor = strlen(text);
++				match();
++			}
++		} 
++		break;
+ 	}
+ 	drawmenu();
+ }
+@@ -686,7 +687,7 @@
+ 	size_t len;
+ 	Item *item;
+ 	char *pos;
+-
++	
+ 	len = strlen(text);
+ 	matches = matchend = NULL;
+ 	for(item = items; item && item->text; item++) {
+@@ -821,7 +822,7 @@
+ 			x = info[snum].x_org;
+ 			y = info[snum].y_org + (topbar ? yoffset : info[i].height - mh - yoffset);
+ 			mw = info[snum].width;
+-
++			
+ 			dimx = info[snum].x_org;
+ 			dimy = info[snum].y_org;
+ 			dimw = info[snum].width;
+@@ -866,10 +867,10 @@
+ 		x = 0;
+ 		y = topbar ? 0 : DisplayHeight(dc->dpy, screen) - mh - yoffset;
+ 		mw = DisplayWidth(dc->dpy, screen);
+-
++		
+ 		dimx = 0;
+ 		dimy = 0;
+-		dimw = WidthOfScreen(defScreen);
++		dimw = WidthOfScreen(defScreen); 
+ 		dimh = HeightOfScreen(defScreen);
+ 	}
+ 
+@@ -878,9 +879,9 @@
+ 	promptw = (prompt && *prompt) ? textw(dc, prompt) : 0;
+ 	inputw = MIN(inputw, mw/3);
+ 	match();
+-
++	
+ 	swa.override_redirect = True;
+-
++	
+ 	/* create dim window */
+ 	if(dimopacity > 0) {
+ 		swa.background_pixel = dimcol->BG;
+@@ -891,16 +892,16 @@
+ 	                    CWOverrideRedirect | CWBackPixel | CWEventMask, &swa);
+ 		XClassHint dimhint = { .res_name = dimname, .res_class = class };
+   	XSetClassHint(dc->dpy, dim, &dimhint);
+-
++  
+ 		dimopacity = MIN(MAX(dimopacity, 0), 1);
+   	unsigned int dimopacity_set = (unsigned int)(dimopacity * OPAQUE);
+   	XChangeProperty(dc->dpy, dim, XInternAtom(dc->dpy, OPACITY, False),
+ 											XA_CARDINAL, 32, PropModeReplace,
+ 											(unsigned char *) &dimopacity_set, 1L);
+-
++	
+ 		XMapRaised(dc->dpy, dim);
+ 	}
+-
++	
+ 	/* create menu window */
+ 	swa.background_pixel = normcol->BG;
+ 	swa.event_mask = ExposureMask | KeyPressMask | VisibilityChangeMask;
+@@ -916,7 +917,7 @@
+   XChangeProperty(dc->dpy, win, XInternAtom(dc->dpy, OPACITY, False),
+ 											XA_CARDINAL, 32, PropModeReplace,
+ 											(unsigned char *) &opacity_set, 1L);
+-
++	
+ 	/* open input methods */
+ 	xim = XOpenIM(dc->dpy, NULL, NULL, NULL);
+ 	xic = XCreateIC(xim, XNInputStyle, XIMPreeditNothing | XIMStatusNothing,
