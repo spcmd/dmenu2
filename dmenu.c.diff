@@ -1,4 +1,4 @@
---- dmenu.c	2017-08-17 15:21:38.000000000 +0200
+--- dmenu.c	2017-08-17 17:44:14.301945755 +0200
 +++ dmenu.c.orig	2013-11-26 09:15:04.000000000 +0100
 @@ -57,7 +57,7 @@
  static const char *normfgcolor = NULL;
@@ -27,6 +27,17 @@
          if(lines > 0) {
              /* draw vertical list */
              dc->w = mw - dc->x;
+@@ -424,8 +424,8 @@
+ 			while(cursor > 0 && text[nextrune(-1)] != ' ' && text[nextrune(-1)] != '/')
+ 				insert(NULL, nextrune(-1) - cursor);
+ 			break;
+-		case XK_V: /* fallthrough */
+-		case XK_v: /* paste selection */
++		case XK_y: /* fallthrough */
++		case XK_Y: /* paste selection */
+ 			XConvertSelection(dc->dpy, (ev->state & ShiftMask) ? clip : XA_PRIMARY,
+ 			                  utf8, utf8, win, CurrentTime);
+ 			return;
 @@ -494,25 +494,11 @@
  			return;
  		/* fallthrough */
