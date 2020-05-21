@@ -27,10 +27,3 @@ Clone this repository, change to the cloned directory, then run the `makepkg` co
 Then run `sudo pacman -U /path/to/package` to install the package.
 
 Or you can use the `makepkg -si` command to build & install automatically.
-
-### Donation
-
-Humbly accepting your kind donation
-
-[![paypal donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=HCPYH3LWZZR9Y
-)
